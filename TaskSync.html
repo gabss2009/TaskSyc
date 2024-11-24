@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskSync</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1, h2 {
+            color: #2d3748;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .datetime-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .datetime-group input[type="date"],
+        .datetime-group input[type="time"] {
+            flex: 1;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        input[type="time"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #764ba2;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #48BB78;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .task-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .priority-select {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .priority-option {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .priority-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        #taskList {
+            margin-top: 20px;
+        }
+
+        .task-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .task-details {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .datetime-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Página de Login -->
+    <div id="loginPage" class="container">
+        <h1>TaskSync</h1>
+        <h2>Bem-vindo de volta</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Seu email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Sua senha" required>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="remember">
+                <label for="remember">Lembrar-me</label>
+            </div>
+            <button type="submit">Entrar</button>
+        </form>
+        <div class="navigation">
+            <a href="#" id="forgotPassword">Esqueceu a senha?</a> |
+            <a href="#" id="showRegister">Criar uma conta</a>
+        </div>
+    </div>
+
+    <!-- Página de Registro -->
+    <div id="registerPage" class="container hidden">
+        <h1>TaskSync</h1>
+        <h2>Criar Nova Conta</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <input type="text" id="newName" placeholder="Seu nome" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="newEmail" placeholder="Seu email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="newPassword" placeholder="Crie uma senha" required>
+            </div>
+            <button type="submit">Criar Conta</button>
+        </form>
+        <div class="navigation">
+            <a href="#" id="showLogin">Já tem uma conta? Faça login</a>
+        </div>
+    </div>
+
+    <!-- Sistema de Tarefas -->
+    <div id="taskSystem" class="container hidden">
+        <h1>TaskSync</h1>
+        <div class="main-content">
+            <section class="task-section">
+                <h2>Adicionar Nova Tarefa</h2>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <input type="text" id="taskTitle" placeholder="Título da tarefa" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="taskDescription" placeholder="Descrição da tarefa"></textarea>
+                    </div>
+                    <div class="form-group datetime-group">
+                        <input type="date" id="deadline" required>
+                        <input type="time" id="taskTime" required>
+                    </div>
+                    <div class="priority-select">
+                        <div class="priority-option" data-priority="baixa">Baixa</div>
+                        <div class="priority-option" data-priority="media">Média</div>
+                        <div class="priority-option" data-priority="alta">Alta</div>
+                    </div>
+                    <div class="form-group">
+                        <select id="reminder">
+                            <option value="30">Lembrete: 30 minutos antes</option>
+                            <option value="60">Lembrete: 1 hora antes</option>
+                            <option value="1440">Lembrete: 1 dia antes</option>
+                        </select>
+                    </div>
+                    <button type="submit">Adicionar Tarefa</button>
+                </form>
+            </section>
+
+            <section class="task-section">
+                <h2>Minhas Tarefas</h2>
+                <div id="taskList">
+                    <!-- Tarefas serão adicionadas aqui dinamicamente -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        document.getElementById('showRegister').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.remove('hidden');
+        });
+
+        document.getElementById('showLogin').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('taskSystem').classList.remove('hidden');
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showNotification('Conta criada com sucesso!');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+        });
+
+        const priorityOptions = document.querySelectorAll('.priority-option');
+        priorityOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                priorityOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('taskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('taskTitle').value;
+            const description = document.getElementById('taskDescription').value;
+            const date = document.getElementById('deadline').value;
+            const time = document.getElementById('taskTime').value;
+            const priority = document.querySelector('.priority-option.selected')?.dataset.priority || 'baixa';
+            
+            const taskElement = document.createElement('div');
+            taskElement.className = 'task-item';
+            taskElement.innerHTML = `
+                <h3>${title}</h3>
+                <p>${description}</p>
+                <div class="task-details">
+                    <p>Data: ${formatDate(date)}</p>
+                    <p>Hora: ${time}</p>
+                    <p>Prioridade: ${priority}</p>
+                </div>
+            `;
+            
+            document.getElementById('taskList').appendChild(taskElement);
+            showNotification('Tarefa adicionada com sucesso!');
+            this.reset();
+        });
+
+        function formatDate(dateString) {
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
